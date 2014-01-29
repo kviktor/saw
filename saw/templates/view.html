@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sub }} | {{ span }} |{% endblock %}
+{% block content %}
+
+<h3 style="text-align: right;">Current time in UTC: {{ current.strftime("%H:%M") }}</h3>
+
+{% if data.daily %}
+  {% include "daily.html" %}
+{% elif data.weekly %}
+  {% include "weekly.html" %}
+{% else %}
+  <h3>This subreddit was <strong>very</strong> recently added, data will be available soon!</h3>
+{% endif %}
+
+{% endblock %}

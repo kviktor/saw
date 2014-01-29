@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Subreddit Activity Watcher</h2>
+<p>
+  This little web application monitors subreddit activity and display them in nice charts!
+  It checks the activity number every ~20 minutes, so subreddit moderators or random users can see when the subreddit is the most active! 
+</p>
+<p class="lead">
+  If you want to get your subreddit monitored just add it at <a href="{{ url_for("register") }}">/register</a>
+</p>
+<h3>Monitored subreddits</h3>
+<table class="table table-bordered table-striped">
+{% for w in watched %}
+  <tr>
+    <td><a href="http://reddit.com/r/{{ w }}" target="blank">/r/{{ w }}</a></td>
+    <td><a href="{{ url_for("view", subreddit=w, span="daily") }}">daily</a></td>
+    <td><a href="{{ url_for("view", subreddit=w, span="weekly") }}">weeky</a></td>
+  </tr>    
+{% endfor %}
+</table>
+{% endblock %}

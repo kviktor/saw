@@ -1,0 +1,46 @@
+{% if data.daily|length < 3*24 %}
+    <h3>Warning this subreddit was recently added!</h3>
+{% endif %}
+
+<div id="chart_div" style="width: 1100px; height: 500px;"></div>
+<div id="chart_div_rel" style="width: 1100px; height: 500px;"></div>
+
+{% block extra_js %}
+  <script type="text/javascript">
+    var chart_data=[{% for d in data.daily %}['{{ d.date.strftime("%H:%M") }}', {{ d.users }}],{% endfor %}]
+    
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawCharts);
+    function drawCharts() {
+      var data = google.visualization.arrayToDataTable(
+          [['Time', 'Active users']].concat(chart_data)
+      );
+
+      var options = {
+        title: 'Daily subreddit activity',
+        titleTextStyle: {
+          color: 'black',
+          fontSize: '22',
+        },
+        vAxis: {
+          minValue: 0,
+        },
+        chartArea: {
+           width: '85%'
+        },
+        pointSize: 8,
+        legend: {
+          position: 'none'
+        },
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+      
+      options['title'] = 'Daily relative subreddit activity';
+      delete options['vAxis']['minValue'];
+      chart = new google.visualization.LineChart(document.getElementById('chart_div_rel'));
+      chart.draw(data, options);
+    }
+  </script>
+{% endblock %}
