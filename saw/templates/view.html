@@ -14,3 +14,12 @@
 {% endif %}
 
 {% endblock %}
+
+{% block extra_js %}
+<script>
+  if(window.addEventListener)
+    window.addEventListener('resize', drawCharts, false);
+  else if(window.attachEvent)
+    window.attachEvent('onresize', drawCharts);
+</script>
+{% endblock %}
