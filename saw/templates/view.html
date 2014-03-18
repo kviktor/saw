@@ -3,7 +3,7 @@
 {% block title %}{{ sub }} | {{ span }} |{% endblock %}
 {% block content %}
 
-<h3 class="pull-right">Current time in UTC: {{ current.strftime("%H:%M") }}</h3>
+<h3 style="text-align: right;">Current time in UTC: {{ current.strftime("%H:%M") }}</h3>
 
 {% if data.daily %}
   {% include "daily.html" %}
