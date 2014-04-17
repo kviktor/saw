@@ -26,7 +26,6 @@ def get_active(subreddit):
     r = requests.get("http://reddit.com/r/%s/about.json" % subreddit,
                      headers=headers)
     try:
-        print r.content
         return r.json()['data'].get('accounts_active')
     except:
         return None
