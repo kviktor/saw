@@ -4,6 +4,11 @@ from datetime import datetime, timedelta
 from random import randrange
 import requests
 
+from sqlalchemy.exc import IntegrityError
+
+from models import Subreddit
+from database import db_session
+from settings import USER_AGENT
 
 # path to this file
 dir_path = os.path.dirname(__file__)
@@ -15,11 +20,22 @@ def get_active(subreddit):
     :param subreddit: the subreddit we are curious about
     """
 
-    r = requests.get("http://reddit.com/r/%s/about.json" % subreddit)
+    headers = {
+        'User-Agent': USER_AGENT
+    }
+    r = requests.get("http://reddit.com/r/%s/about.json" % subreddit,
+                     headers=headers)
     try:
+        print r.content
         return r.json()['data'].get('accounts_active')
     except:
         return None
+
+
+def get_subreddits():
+    """
+    """
+    return Subreddit.query.all()
 
 
 def add_subreddit(sub):
@@ -31,17 +47,14 @@ def add_subreddit(sub):
     if get_active(sub) is None:
         return "Invalid subreddit!"
 
-    with open(os.path.join(dir_path, 'data/subreddits'), "r+") as f:
-        subreddits = f.read().strip().split(',')
-        if sub in subreddits:
-            return "/r/%s is already monitored!" % sub
-        else:
-            subreddits.append(sub.lower())
-            f.seek(0)
-            f.write(','.join(subreddits)),
-            pickle_path = os.path.join(dir_path, "data/activities/%s.p" % sub)
-            pickle.dump([], open(pickle_path, "wb"))
-            return True
+    s = Subreddit(name=sub, added=datetime.utcnow())
+    db_session.add(s)
+    try:
+        db_session.commit()
+        return True
+    except IntegrityError:
+        db_session.rollback()
+        return "/r/%s is already monitored!" % sub
 
 
 def get_subreddit(sub, span):

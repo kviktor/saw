@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, url_for
-from helpers import add_subreddit, get_subreddit, check_subreddit
+from helpers import (
+    add_subreddit, get_subreddit, check_subreddit, get_subreddits,
+)
 
 app = Flask(__name__)
 app.config.from_object('settings')
@@ -13,11 +15,7 @@ dir_path = os.path.dirname(__file__)
 
 @app.route('/')
 def index():
-    watched = []
-    with open(os.path.join(dir_path, "data", "subreddits")) as f:
-        watched = f.read().strip().split(',')
-
-    return render_template('index.html', watched=watched)
+    return render_template('index.html', watched=get_subreddits())
 
 
 @app.route('/register', methods=['GET', 'POST'])
