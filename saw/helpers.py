@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from random import randrange
 import requests
 
-from sqlalchemy.exc import IntegrityError
-
 from models import Subreddit
 from database import db_session
 from settings import USER_AGENT
@@ -46,14 +44,17 @@ def add_subreddit(sub):
     if get_active(sub) is None:
         return "Invalid subreddit!"
 
+    if Subreddit.query.filter_by(name=sub).first():
+        return "/r/%s is already monitored!" % sub
+
     s = Subreddit(name=sub, added=datetime.utcnow())
-    db_session.add(s)
     try:
+        db_session.add(s)
         db_session.commit()
         return True
-    except IntegrityError:
+    except:
         db_session.rollback()
-        return "/r/%s is already monitored!" % sub
+        return "Unknown error!"
 
 
 def get_subreddit(sub, span):
