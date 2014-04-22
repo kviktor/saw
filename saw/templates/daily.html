@@ -7,7 +7,7 @@
 
 {% block extra_js %}
   <script type="text/javascript">
-    var chart_data=[{% for d in data.daily %}['{{ d.date.strftime("%H:%M") }}', {{ d.users }}],{% endfor %}]
+    var chart_data=[{% for d in data.daily %}['{{ d.time.strftime("%H:%M") }}', {{ d.users }}],{% endfor %}]
     
     google.load("visualization", "1", {packages:["corechart"]});
     google.setOnLoadCallback(drawCharts);

@@ -1,15 +1,10 @@
-import cPickle as pickle
-import os
 from datetime import datetime, timedelta
 from random import randrange
 import requests
 
-from models import Subreddit
+from models import Subreddit, Activity
 from database import db_session
 from settings import USER_AGENT
-
-# path to this file
-dir_path = os.path.dirname(__file__)
 
 
 def get_active(subreddit):
@@ -30,7 +25,7 @@ def get_active(subreddit):
 
 
 def get_subreddits():
-    """
+    """ Returns the list of monitored subreddits
     """
     return Subreddit.query.all()
 
@@ -60,84 +55,55 @@ def add_subreddit(sub):
 def get_subreddit(sub, span):
     """Returns the active numbers for the given time span
 
-    Note: it doesn't actually check timestamps just returns the last
-    72 / 504 element. (online number check every 20 minutes -> 3/hour)
-
     :param sub: subreddit
     :param span: can be either weekly or daily
     """
-    try:
-        r = pickle.load(open(os.path.join(dir_path,
-                                          'data/activities/%s.p' % sub)))
-    except:
-        return None
 
     if span == 'daily':
-        return r[-24 * 3 - 1:]
+        return Activity.query.filter_by(subreddit=sub).filter(
+            Activity.time > datetime.utcnow() - timedelta(hours=24)).order_by(
+                Activity.time.desc()).all()
     elif span == 'weekly':
-        return r[-24 * 3 * 7 - 1:]
+        return Activity.query.filter_by(subreddit=sub).filter(
+            Activity.time > datetime.utcnow() - timedelta(weeks=1)).order_by(
+                Activity.time.desc()).all()
     else:
         # then wat?
         return None
 
 
-def check_subreddit(sub):
-    """ Checks whether we are already watching the subreddit or not
-
-    :param sub: subreddit to check
-    """
-
-    with open(os.path.join(dir_path, 'data/subreddits'), "r") as f:
-        subreddits = f.read().strip().split(',')
-        if sub in subreddits:
-            return True
-        else:
-            return False
-
-
 def update_subreddit(sub):
     """Updates the subreddit's data
 
-    Gets the current online user data for the specified subreddit, then
-    appends this value to the picke file.
-    (if there is no pickle file it creates a new empty one)
-
     :param sub: subreddit to update
     """
+
     active = get_active(sub)
+    a = Activity(users=active, time=datetime.utcnow(), subreddit=sub)
     try:
-        file_dir = os.path.join(dir_path, "data", "activities", "%s.p" % sub)
-        sub_data = pickle.load(open(file_dir, "rb"))
-        sub_data.append({
-            'users': active if active is not None else sub_data[-1],
-            'date': datetime.utcnow()
-        })
-        pickle.dump(sub_data, open(file_dir, "wb"))
-    except IOError:
-        pickle.dump([], open(file_dir, "wb"))
-    except Exception:
-        pass
+        db_session.add(a)
+        db_session.commit()
+        return True
+    except:
+        db_session.rollback()
 
 
 def remove_subreddit(sub):
     """Removes the specifies subreddit
 
-    It deletes the name from the subreddit list file and also deletes
-    the pickle file.
-
     :param sub: subreddit
     """
-    with open(os.path.join(dir_path, 'data/subreddits'), "r+") as f:
-        subreddits = f.read().strip().split(',')
-        if sub in subreddits:
-            idx = subreddits.index(sub)
-            subreddits.pop(idx)
-            f.seek(0)
-            f.write(",".join(subreddits)),
-            f.truncate()
-            print "Removed from subreddit list!"
-            os.remove(os.path.join(dir_path, "data/activities/%s.p" % sub))
-            print "Removed pickle file!"
+
+    s = Subreddit.query.filter_by(name=sub).first()
+    if s is None:
+        print "No subreddit named: %s" % sub
+
+    try:
+        db_session.delete(s)
+        db_session.commit()
+    except:
+        db_session.rollback()
+        return "Unknown error!"
 
 
 def data_gen():

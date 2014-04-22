@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, url_for
 from helpers import (
-    add_subreddit, get_subreddit, check_subreddit, get_subreddits,
+    add_subreddit, get_subreddit, get_subreddits,
 )
 
 app = Flask(__name__)
@@ -43,7 +43,7 @@ def view(subreddit, span):
     if span not in ['weekly', 'daily']:
         flash("Sorry we can't do %s!" % span, 'danger')
         return redirect(url_for("index"))
-    if not check_subreddit(subreddit):
+    if subreddit not in [s.name for s in get_subreddits()]:
         flash("This subreddit is not monitored!", 'danger')
         return redirect(url_for("index"))
 

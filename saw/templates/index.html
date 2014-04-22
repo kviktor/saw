@@ -15,8 +15,8 @@
 {% for w in watched %}
   <tr>
     <td><a href="http://reddit.com/r/{{ w.name }}" target="blank">/r/{{ w.name }}</a></td>
-    <td><a href="{{ url_for("view", subreddit=w, span="daily") }}">daily</a></td>
-    <td><a href="{{ url_for("view", subreddit=w, span="weekly") }}">weeky</a></td>
+    <td><a href="{{ url_for("view", subreddit=w.name, span="daily") }}">daily</a></td>
+    <td><a href="{{ url_for("view", subreddit=w.name, span="weekly") }}">weeky</a></td>
   </tr>    
 {% endfor %}
 </table>
