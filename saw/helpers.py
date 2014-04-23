@@ -59,14 +59,14 @@ def get_subreddit(sub, span):
     :param span: can be either weekly or daily
     """
 
+    query = Activity.query.filter_by(subreddit=sub).order_by(
+        Activity.time.asc())
     if span == 'daily':
-        return Activity.query.filter_by(subreddit=sub).filter(
-            Activity.time > datetime.utcnow() - timedelta(hours=24)).order_by(
-                Activity.time.desc()).all()
+        return query.filter(
+            Activity.time > datetime.utcnow() - timedelta(hours=24)).all()
     elif span == 'weekly':
-        return Activity.query.filter_by(subreddit=sub).filter(
-            Activity.time > datetime.utcnow() - timedelta(weeks=1)).order_by(
-                Activity.time.desc()).all()
+        return query.filter(
+            Activity.time > datetime.utcnow() - timedelta(weeks=1)).all()
     else:
         # then wat?
         return None
