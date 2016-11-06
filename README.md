@@ -1,4 +1,4 @@
-# SAW (Subreddit Activity Watcher)
+# SAW (Subreddit Activity Watcher) ![build](https://api.travis-ci.org/kviktor/saw.svg?branch=master)
 
 Monitor currently online users for subreddits. It checks the online user count every ~20 minutes.
 
@@ -26,6 +26,4 @@ With uwsgi modify the ini file then simply run
 
 ## TODO
 
-- see how well pickling performs with more data, then maybe change to some light db
-- tests after db
-- no js?
+- tests
