@@ -13,9 +13,7 @@ def get_active(subreddit):
     :param subreddit: the subreddit we are curious about
     """
 
-    headers = {
-        'User-Agent': USER_AGENT
-    }
+    headers = {'User-Agent': USER_AGENT}
     r = requests.get("http://reddit.com/r/%s/about.json" % subreddit,
                      headers=headers)
     try:
@@ -61,12 +59,12 @@ def get_subreddit(sub, span):
 
     query = Activity.query.filter_by(subreddit=sub).order_by(
         Activity.time.asc())
-    if span == 'daily':
-        return query.filter(
-            Activity.time > datetime.utcnow() - timedelta(hours=24)).all()
-    elif span == 'weekly':
-        return query.filter(
-            Activity.time > datetime.utcnow() - timedelta(weeks=1)).all()
+    delta = {
+        'daily': timedelta(hours=24),
+        'weekly': timedelta(weeks=1)
+    }.get(span)
+    if delta:
+        return query.filter(Activity.time > datetime.utcnow() - delta).all()
     else:
         # then wat?
         return None
@@ -96,7 +94,7 @@ def remove_subreddit(sub):
 
     s = Subreddit.query.filter_by(name=sub).first()
     if s is None:
-        print "No subreddit named: %s" % sub
+        print("No subreddit named: %s" % sub)
 
     try:
         db_session.delete(s)
@@ -111,7 +109,7 @@ def data_gen():
     """
     data = []
     now = datetime.now()
-    for i in xrange(1, 16000):
+    for i in range(1, 16000):
         data.append({
             'users': randrange(5, 155),
             'date': now + timedelta(minutes=i * 15)
@@ -120,4 +118,4 @@ def data_gen():
 
 
 if __name__ == "__main__":
-    print "You should not run this file ..."
+    print("You should not run this file ...")

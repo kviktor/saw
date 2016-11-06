@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, url_for
-from helpers import (
-    add_subreddit, get_subreddit, get_subreddits,
-)
+from helpers import add_subreddit, get_subreddit, get_subreddits
 
 app = Flask(__name__)
 app.config.from_object("settings")
@@ -50,6 +48,7 @@ def view(subreddit, span):
     }
     return render_template("view.html", data=data, sub=subreddit, span=span,
                            current=datetime.utcnow())
+
 
 if __name__ == "__main__":
     app.run()
